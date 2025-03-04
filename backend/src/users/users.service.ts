@@ -1,22 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UsersRepository } from './users.repository';
+import { HashingService } from './hashing/hashing.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly hashingService: HashingService,
+  ) {}
 
   async create(createUserInput: CreateUserInput) {
     return this.usersRepository.create({
       ...createUserInput,
-      password: await this.hashPassword(createUserInput.password),
+      password: await this.hashingService.hash(createUserInput.password),
     });
-  }
-
-  private async hashPassword(password: string) {
-    return bcrypt.hash(password, 10);
   }
 
   async findAll() {
@@ -29,7 +28,7 @@ export class UsersService {
 
   async update(_id: string, updateUserInput: UpdateUserInput) {
     if (updateUserInput.password) {
-      updateUserInput.password = await this.hashPassword(
+      updateUserInput.password = await this.hashingService.hash(
         updateUserInput.password,
       );
     }
