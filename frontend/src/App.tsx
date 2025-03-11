@@ -1,8 +1,8 @@
 import {
   Container,
-  createTheme,
   CssBaseline,
   ThemeProvider,
+  createTheme,
 } from "@mui/material";
 import { RouterProvider } from "react-router-dom";
 import router from "./components/Routes";
@@ -15,7 +15,7 @@ const darkTheme = createTheme({
   },
 });
 
-function App() {
+const App = () => {
   return (
     <ApolloProvider client={client}>
       <ThemeProvider theme={darkTheme}>
@@ -26,6 +26,6 @@ function App() {
       </ThemeProvider>
     </ApolloProvider>
   );
-}
+};
 
 export default App;

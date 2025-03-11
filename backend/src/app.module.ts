@@ -44,7 +44,7 @@ import { LoggerModule } from 'nestjs-pino';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AppController],
+  // controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
