@@ -7,7 +7,7 @@ import { DbMigrationService } from './db-migration.service';
   imports: [
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get('MONGODB_URI'),
+        uri: configService.getOrThrow('MONGODB_URI'),
         //ssl: true, // Enable SSL
       }),
       inject: [ConfigService],
