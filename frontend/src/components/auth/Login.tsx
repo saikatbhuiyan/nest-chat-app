@@ -7,7 +7,11 @@ function Login() {
   const { login, error } = useLogin();
 
   return (
-    <Auth submitLabel="Login" handleSubmit={(request) => login(request)}>
+    <Auth
+      submitLabel="Login"
+      handleSubmit={(request) => login(request)}
+      error={error}
+    >
       <MUILink
         component={Link}
         to="/signup"
