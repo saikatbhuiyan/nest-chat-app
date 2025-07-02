@@ -17,7 +17,9 @@ const useLogin = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(request),
+      credentials: "include",
     });
+    console.log("Login response:", res);
     if (!res.ok) {
       if (res.status === 401) {
         setError("Credentials are not valid.");

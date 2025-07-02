@@ -16,14 +16,14 @@ interface AuthProps {
 function Auth({ submitLabel, handleSubmit, children, error }: AuthProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { data } = useGetMe;
+  const { data: user } = useGetMe();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (data?.user) {
+    if (user) {
       navigate("/");
     }
-  }, [data, navigate]);
+  }, [user, navigate]);
 
   return (
     <Stack

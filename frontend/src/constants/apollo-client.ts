@@ -18,7 +18,10 @@ const logoutLink = onError((error) => {
   }
 });
 
-const httpLink = new HttpLink({ uri: `${API_URL}/graphql` });
+const httpLink = new HttpLink({
+  uri: `${API_URL}/graphql`,
+  credentials: "include", // ✅ send cookies with GraphQL requests
+});
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
