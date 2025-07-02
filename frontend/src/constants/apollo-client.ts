@@ -3,6 +3,7 @@ import { onError } from "@apollo/client/link/error";
 import { API_URL } from "./urls";
 import excludedRoutes from "./excluded-routes";
 import router from "../components/Routes";
+import { onLogout } from "../utils/logout";
 
 const logoutLink = onError((error) => {
   if (
@@ -12,12 +13,15 @@ const logoutLink = onError((error) => {
   ) {
     if (!excludedRoutes.includes(window.location.pathname)) {
       router.navigate("/login");
-      client.resetStore();
+      onLogout();
     }
   }
 });
 
-const httpLink = new HttpLink({ uri: `${API_URL}/graphql` });
+const httpLink = new HttpLink({
+  uri: `${API_URL}/graphql`,
+  credentials: "include", // ✅ send cookies with GraphQL requests
+});
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),

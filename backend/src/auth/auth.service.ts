@@ -12,7 +12,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(user: User, response: Response) {
+  async login(user: User, response: Response): Promise<{ message: string }> {
     const payload: TokenPayload = {
       email: user.email,
       _id: user._id.toHexString(),
@@ -35,10 +35,12 @@ export class AuthService {
     response.cookie('Authentication', accessToken, {
       httpOnly: true,
       secure: this.configService.get<string>('NODE_ENV') === 'production',
+      sameSite: 'lax', // Add this for better CSRF protection
       expires,
     });
-  }
 
+    return { message: 'Login successful' };
+  }
   logout(response: Response) {
     response.cookie('Authentication', '', {
       httpOnly: true,
