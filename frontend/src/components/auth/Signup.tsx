@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Link as MUILink } from "@mui/material";
 import { useCreateUser } from "../../hooks/useCreateUser";
 import Auth from "./Auth";
@@ -8,6 +9,7 @@ import { useState } from "react";
 function Signup() {
   const [createUser] = useCreateUser();
   const [error, setError] = useState<string>("");
+  const navigate = useNavigate();
 
   return (
     <Auth
@@ -24,6 +26,7 @@ function Signup() {
             },
           });
           setError("");
+          navigate("/login");
         } catch (err) {
           const errorMessage = extractErrorMessage(err);
           if (errorMessage) {
