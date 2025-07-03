@@ -1,6 +1,7 @@
 import {
   Container,
   CssBaseline,
+  Box,
   ThemeProvider,
   createTheme,
 } from "@mui/material";
@@ -11,6 +12,7 @@ import client from "./constants/apollo-client";
 import Guard from "./components/auth/Guard";
 import Header from "./components/header/Header";
 import Snackbar from "./components/snackbar/Snackbar";
+import ChatList from "./components/chat-list/ChatList";
 
 const darkTheme = createTheme({
   palette: {
@@ -24,11 +26,18 @@ const App = () => {
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
         <Header />
-        <Container>
-          <Guard>
-            <RouterProvider router={router} />
-          </Guard>
-        </Container>
+        <Box display="flex">
+          <Box flex="0 0 25%" maxWidth="25%">
+            <ChatList />
+          </Box>
+          <Box flex="1">
+            <Container>
+              <Guard>
+                <RouterProvider router={router} />
+              </Guard>
+            </Container>
+          </Box>
+        </Box>
         <Snackbar />
       </ThemeProvider>
     </ApolloProvider>
