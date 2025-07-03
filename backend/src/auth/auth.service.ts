@@ -41,6 +41,7 @@ export class AuthService {
 
     return { message: 'Login successful' };
   }
+
   logout(response: Response) {
     response.cookie('Authentication', '', {
       httpOnly: true,
