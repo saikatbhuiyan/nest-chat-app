@@ -2,53 +2,87 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChatInput } from './dto/create-chat.input';
 import { UpdateChatInput } from './dto/update-chat.input';
 import { ChatsRepository } from './chats.repository';
-import { Chat } from './entities/chat.entity';
+import { PipelineStage, Types } from 'mongoose';
+import { PaginationArgs } from '../common/dto/pagination-args.dto';
 
 @Injectable()
 export class ChatsService {
   constructor(private readonly chatsRepository: ChatsRepository) {}
 
-  async create(
-    createChatInput: CreateChatInput,
-    userId: string,
-  ): Promise<Chat> {
+  async create(createChatInput: CreateChatInput, userId: string) {
     return this.chatsRepository.create({
       ...createChatInput,
       userId,
-      userIds: createChatInput.userIds || [],
+      messages: [],
     });
   }
 
-  async findAll(): Promise<Chat[]> {
-    return this.chatsRepository.find({});
+  async findMany(
+    prePipelineStages: PipelineStage[] = [],
+    paginationArgs?: PaginationArgs,
+  ) {
+    const chats = await this.chatsRepository.model.aggregate([
+      ...prePipelineStages,
+      {
+        $set: {
+          latestMessage: {
+            $cond: [
+              '$messages',
+              { $arrayElemAt: ['$messages', -1] },
+              {
+                createdAt: new Date(),
+              },
+            ],
+          },
+        },
+      },
+      { $sort: { 'latestMessage.createdAt': -1 } },
+      { $skip: paginationArgs.skip },
+      { $limit: paginationArgs.limit },
+      { $unset: 'messages' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'latestMessage.userId',
+          foreignField: '_id',
+          as: 'latestMessage.user',
+        },
+      },
+    ]);
+    chats.forEach((chat) => {
+      if (!chat.latestMessage?._id) {
+        delete chat.latestMessage;
+        return;
+      }
+      chat.latestMessage.user = chat.latestMessage.user[0];
+      delete chat.latestMessage.userId;
+      chat.latestMessage.chatId = chat._id;
+    });
+    return chats;
   }
 
-  async findMyAll(userId: string): Promise<Chat[]> {
-    return this.chatsRepository.find({ userId });
+  async countChats() {
+    return this.chatsRepository.model.countDocuments({});
   }
 
-  async findOne(_id: string): Promise<Chat> {
-    const chat = await this.chatsRepository.findOne({ _id });
-    if (!chat) throw new NotFoundException('Chat not found');
-    return chat;
+  async findOne(_id: string) {
+    const chats = await this.findMany([
+      { $match: { chatId: new Types.ObjectId(_id) } },
+    ]);
+    if (!chats[0]) {
+      throw new NotFoundException(`No chat was found with ID ${_id}`);
+    }
+    return chats[0];
   }
 
-  async update(
-    _id: string,
-    updateChatInput: UpdateChatInput,
-    userId: string,
-  ): Promise<Chat> {
-    const chat = await this.chatsRepository.findOneAndUpdate(
-      { _id, userId },
+  update(_id: string, updateChatInput: UpdateChatInput) {
+    return this.chatsRepository.findOneAndUpdate(
+      { _id },
       { ...updateChatInput },
     );
-    if (!chat) throw new NotFoundException('Chat not found or not authorized');
-    return chat;
   }
 
-  async remove(_id: string, userId: string): Promise<Chat> {
-    const chat = await this.chatsRepository.findOneAndDelete({ _id, userId });
-    if (!chat) throw new NotFoundException('Chat not found or not authorized');
-    return chat;
+  remove(id: number) {
+    return `This action removes a #${id} chat`;
   }
 }

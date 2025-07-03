@@ -1,9 +1,9 @@
-import { JSX, useEffect } from "react";
+import { useEffect } from "react";
 import excludedRoutes from "../../constants/excluded-routes";
 import { useGetMe } from "../../hooks/useGetMe";
 import { authenticatedVar } from "../../constants/authenticated";
-import { UNKNOWN_ERROR_SNACK_MESSAGE } from "../../constants/errors";
 import { snackVar } from "../../constants/snack";
+import { UNKNOWN_ERROR_SNACK_MESSAGE } from "../../constants/errors";
 import { usePath } from "../../hooks/usePath";
 
 interface GuardProps {

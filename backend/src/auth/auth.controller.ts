@@ -20,6 +20,6 @@ export class AuthController {
 
   @Post('logout')
   logout(@Res({ passthrough: true }) response: Response) {
-    this.authService.logout(response);
+    return this.authService.logout(response);
   }
 }

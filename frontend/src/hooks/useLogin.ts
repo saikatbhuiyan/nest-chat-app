@@ -8,8 +8,12 @@ interface LoginRequest {
   password: string;
 }
 
+console.log("API_URL:", API_URL);
+
 const useLogin = () => {
   const [error, setError] = useState<string>();
+
+  console.log("API_URL:", API_URL);
 
   const login = async (request: LoginRequest) => {
     const res = await fetch(`${API_URL}/api/auth/login`, {
@@ -17,10 +21,9 @@ const useLogin = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(request),
       credentials: "include",
+      body: JSON.stringify(request),
     });
-    console.log("Login response:", res);
     if (!res.ok) {
       if (res.status === 401) {
         setError("Credentials are not valid.");

@@ -1,57 +1,45 @@
-import { CurrentUser } from '../auth/current-user.decorator';
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ChatsService } from './chats.service';
 import { Chat } from './entities/chat.entity';
 import { CreateChatInput } from './dto/create-chat.input';
 import { UpdateChatInput } from './dto/update-chat.input';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 import { TokenPayload } from '../auth/token-payload.interface';
+import { PaginationArgs } from '../common/dto/pagination-args.dto';
 
 @Resolver(() => Chat)
 export class ChatsResolver {
   constructor(private readonly chatsService: ChatsService) {}
 
+  @UseGuards(GqlAuthGuard)
   @Mutation(() => Chat)
   async createChat(
     @Args('createChatInput') createChatInput: CreateChatInput,
     @CurrentUser() user: TokenPayload,
   ): Promise<Chat> {
-    return await this.chatsService.create(createChatInput, user._id);
+    return this.chatsService.create(createChatInput, user._id);
   }
 
+  @UseGuards(GqlAuthGuard)
   @Query(() => [Chat], { name: 'chats' })
-  async findAll(): Promise<Chat[]> {
-    return await this.chatsService.findAll();
-  }
-
-  @Query(() => [Chat], { name: 'my_chats' })
-  async findMyAll(@CurrentUser() user: TokenPayload): Promise<Chat[]> {
-    return await this.chatsService.findMyAll(user._id);
+  async findAll(@Args() paginationArgs: PaginationArgs): Promise<Chat[]> {
+    return this.chatsService.findMany([], paginationArgs);
   }
 
   @Query(() => Chat, { name: 'chat' })
-  async findOne(
-    @Args('_id', { type: () => String }) _id: string,
-  ): Promise<Chat> {
-    return await this.chatsService.findOne(_id);
+  async findOne(@Args('_id') _id: string): Promise<Chat> {
+    return this.chatsService.findOne(_id);
   }
 
   @Mutation(() => Chat)
-  async updateChat(
-    @Args('updateChatInput') updateChatInput: UpdateChatInput,
-    @CurrentUser() user: TokenPayload,
-  ): Promise<Chat> {
-    return await this.chatsService.update(
-      updateChatInput._id,
-      updateChatInput,
-      user._id,
-    );
+  updateChat(@Args('updateChatInput') updateChatInput: UpdateChatInput) {
+    return this.chatsService.update(updateChatInput.id, updateChatInput);
   }
 
   @Mutation(() => Chat)
-  async removeChat(
-    @Args('_id', { type: () => String }) _id: string,
-    @CurrentUser() user: TokenPayload,
-  ): Promise<Chat> {
-    return await this.chatsService.remove(_id, user._id);
+  removeChat(@Args('id', { type: () => Int }) id: number) {
+    return this.chatsService.remove(id);
   }
 }

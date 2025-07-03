@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
@@ -13,33 +13,44 @@ export class AuthService {
   ) {}
 
   async login(user: User, response: Response): Promise<{ message: string }> {
-    const payload: TokenPayload = {
-      email: user.email,
+    const tokenPayload: TokenPayload = {
       _id: user._id.toHexString(),
+      email: user.email,
     };
 
-    const expires = new Date();
-    expires.setSeconds(
-      expires.getSeconds() +
-        parseInt(
-          this.configService.getOrThrow<string>('JWT_EXPIRATION_TIME'),
-          10,
-        ),
+    const expireTime = parseInt(
+      this.configService.getOrThrow<string>('JWT_EXPIRATION_TIME'),
+      10,
     );
 
-    const accessToken = this.jwtService.sign(payload, {
+    console.log(this.configService.getOrThrow<string>('JWT_EXPIRATION_TIME'));
+
+    const expires = new Date();
+    expires.setSeconds(expires.getSeconds() + expireTime);
+
+    const token = this.jwtService.sign(tokenPayload, {
       secret: this.configService.getOrThrow<string>('JWT_SECRET'),
-      expiresIn: this.configService.getOrThrow<string>('JWT_EXPIRATION_TIME'),
+      expiresIn: expireTime,
     });
 
-    response.cookie('Authentication', accessToken, {
+    console.log(token);
+    response.cookie('Authentication', token, {
       httpOnly: true,
       secure: this.configService.get<string>('NODE_ENV') === 'production',
-      sameSite: 'lax', // Add this for better CSRF protection
       expires,
     });
 
-    return { message: 'Login successful' };
+    return { message: 'Login successfully' };
+  }
+
+  verifyWs(request: Request): TokenPayload {
+    const cookies: string[] = request.headers.cookie.split('; ');
+    console.log('request.headers.cookie', request.headers.cookie);
+    const authCookie = cookies.find((cookie) =>
+      cookie.includes('Authentication'),
+    );
+    const jwt = authCookie.split('Authentication=')[1];
+    return this.jwtService.verify(jwt);
   }
 
   logout(response: Response) {
@@ -47,5 +58,7 @@ export class AuthService {
       httpOnly: true,
       expires: new Date(),
     });
+
+    return { message: 'Logout successfully' };
   }
 }

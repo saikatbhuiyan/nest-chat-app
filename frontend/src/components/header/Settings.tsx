@@ -6,10 +6,10 @@ import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
-import { onLogout } from "../../utils/logout";
 import { useLogout } from "../../hooks/useLogout";
-import { UNKNOWN_ERROR_SNACK_MESSAGE } from "../../constants/errors";
+import { onLogout } from "../../utils/logout";
 import { snackVar } from "../../constants/snack";
+import { UNKNOWN_ERROR_SNACK_MESSAGE } from "../../constants/errors";
 
 const Settings = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -53,7 +53,8 @@ const Settings = () => {
               await logout();
               onLogout();
               handleCloseUserMenu();
-            } catch {
+            } catch (err) {
+              console.error(err);
               snackVar(UNKNOWN_ERROR_SNACK_MESSAGE);
             }
           }}

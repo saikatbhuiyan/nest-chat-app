@@ -1,33 +1,46 @@
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router";
-import { Link as MUILink } from "@mui/material";
-import { useCreateUser } from "../../hooks/useCreateUser";
+import { Link as MUILink, TextField } from "@mui/material";
 import Auth from "./Auth";
-import { extractErrorMessage } from "../../utils/errors";
+import { useCreateUser } from "../../hooks/useCreateUser";
 import { useState } from "react";
+import { extractErrorMessage } from "../../utils/errors";
+import { useLogin } from "../../hooks/useLogin";
 import { UNKNOWN_ERROR_MESSAGE } from "../../constants/errors";
 
-function Signup() {
+const Signup = () => {
   const [createUser] = useCreateUser();
-  const [error, setError] = useState<string>("");
-  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useLogin();
 
   return (
     <Auth
       submitLabel="Signup"
       error={error}
-      handleSubmit={async ({ email, password }) => {
+      extraFields={[
+        <TextField
+          type="text"
+          label="Username"
+          variant="outlined"
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+          error={!!error}
+          helperText={error}
+        />,
+      ]}
+      onSubmit={async ({ email, password }) => {
         try {
           await createUser({
             variables: {
               createUserInput: {
                 email,
+                username,
                 password,
               },
             },
           });
+          await login({ email, password });
           setError("");
-          navigate("/login");
         } catch (err) {
           const errorMessage = extractErrorMessage(err);
           if (errorMessage) {
@@ -38,17 +51,11 @@ function Signup() {
         }
       }}
     >
-      <MUILink
-        component={Link}
-        to="/login"
-        underline="none"
-        color="inherit"
-        style={{ alignSelf: "center" }}
-      >
-        Login
-      </MUILink>
+      <Link to={"/login"} style={{ alignSelf: "center" }}>
+        <MUILink>Login</MUILink>
+      </Link>
     </Auth>
   );
-}
+};
 
 export default Signup;
