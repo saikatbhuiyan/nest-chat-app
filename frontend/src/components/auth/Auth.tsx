@@ -5,37 +5,36 @@ import { useNavigate } from "react-router";
 
 interface AuthProps {
   submitLabel: string;
-  handleSubmit: (credential: {
-    email: string;
-    password: string;
-  }) => Promise<void>;
-  children?: React.ReactNode;
+  onSubmit: (credentials: { email: string; password: string }) => Promise<void>;
+  children: React.ReactNode;
+  extraFields?: React.ReactNode[];
   error?: string;
 }
 
-function Auth({ submitLabel, handleSubmit, children, error }: AuthProps) {
+const Auth = ({
+  submitLabel,
+  onSubmit,
+  children,
+  error,
+  extraFields,
+}: AuthProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { data: user } = useGetMe();
+  const { data } = useGetMe();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (data) {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [data, navigate]);
 
   return (
     <Stack
       spacing={3}
       sx={{
         height: "100vh",
-        maxWidth: {
-          xs: "70%",
-          md: "50%",
-          lg: "40%",
-          xl: "30%",
-        },
+        maxWidth: 360,
         margin: "0 auto",
         justifyContent: "center",
       }}
@@ -45,32 +44,26 @@ function Auth({ submitLabel, handleSubmit, children, error }: AuthProps) {
         label="Email"
         variant="outlined"
         value={email}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setEmail(e.target.value)
-        }
+        onChange={(event) => setEmail(event.target.value)}
         error={!!error}
         helperText={error}
       />
+      {extraFields}
       <TextField
         type="password"
         label="Password"
         variant="outlined"
         value={password}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setPassword(e.target.value)
-        }
         error={!!error}
         helperText={error}
+        onChange={(event) => setPassword(event.target.value)}
       />
-      <Button
-        variant="contained"
-        onClick={() => handleSubmit({ email, password })}
-      >
+      <Button variant="contained" onClick={() => onSubmit({ email, password })}>
         {submitLabel}
       </Button>
       {children}
     </Stack>
   );
-}
+};
 
 export default Auth;

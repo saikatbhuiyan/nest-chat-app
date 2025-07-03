@@ -5,8 +5,8 @@ import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
-import router from "../../Routes";
 import { Page } from "../../../interfaces/page.interface";
+import router from "../../Routes";
 
 interface MobileNavigationProps {
   pages: Page[];

@@ -3,26 +3,22 @@ import { Link as MUILink } from "@mui/material";
 import Auth from "./Auth";
 import { useLogin } from "../../hooks/useLogin";
 
-function Login() {
+const Login = () => {
   const { login, error } = useLogin();
 
   return (
-    <Auth
-      submitLabel="Login"
-      handleSubmit={(request) => login(request)}
-      error={error}
-    >
-      <MUILink
-        component={Link}
-        to="/signup"
-        underline="none"
-        color="inherit"
-        style={{ alignSelf: "center" }}
+    <>
+      <Auth
+        submitLabel="Login"
+        onSubmit={(request) => login(request)}
+        error={error}
       >
-        Signup
-      </MUILink>
-    </Auth>
+        <Link to={"/signup"} style={{ alignSelf: "center" }}>
+          <MUILink>Signup</MUILink>
+        </Link>
+      </Auth>
+    </>
   );
-}
+};
 
 export default Login;

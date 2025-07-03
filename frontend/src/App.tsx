@@ -1,9 +1,9 @@
 import {
   Container,
   CssBaseline,
-  Box,
   ThemeProvider,
   createTheme,
+  Box,
 } from "@mui/material";
 import { RouterProvider } from "react-router-dom";
 import router from "./components/Routes";
@@ -23,6 +23,7 @@ const darkTheme = createTheme({
 
 const App = () => {
   const { path } = usePath();
+  const showChatList = path === "/" || path.includes("chats");
 
   return (
     <ApolloProvider client={client}>
@@ -30,18 +31,29 @@ const App = () => {
         <CssBaseline />
         <Header />
         <Guard>
-          {path === "/" ? (
-            <Box display="flex">
-              <Box flex="0 0 25%" maxWidth="25%">
-                <ChatList />
+          <Container maxWidth="xl" sx={{ marginTop: "1rem" }}>
+            {showChatList ? (
+              <Box
+                display="grid"
+                gridTemplateColumns={{
+                  xs: "1fr",
+                  md: "5fr 7fr",
+                  lg: "4fr 8fr",
+                  xl: "3fr 9fr",
+                }}
+                gap={5}
+              >
+                <Box>
+                  <ChatList />
+                </Box>
+                <Box>
+                  <Routes />
+                </Box>
               </Box>
-              <Box flex="1">
-                <Routes />
-              </Box>
-            </Box>
-          ) : (
-            <Routes />
-          )}
+            ) : (
+              <Routes />
+            )}
+          </Container>
         </Guard>
         <Snackbar />
       </ThemeProvider>
@@ -50,11 +62,7 @@ const App = () => {
 };
 
 const Routes = () => {
-  return (
-    <Container>
-      <RouterProvider router={router} />
-    </Container>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;
